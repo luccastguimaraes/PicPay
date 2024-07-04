@@ -10,12 +10,12 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "merchant_users")
-@Getter
-@Setter
 public class MerchantUser extends User{
 
    public MerchantUser(Long id, String firstName, String lastName, String document, String email, String password, BigDecimal balance) {
       super(id, firstName, lastName, document, email, password, balance, UserType.MERCHANT);
    }
 
+   public MerchantUser() {
+   }
 }

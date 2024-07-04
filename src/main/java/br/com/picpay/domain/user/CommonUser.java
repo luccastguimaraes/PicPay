@@ -13,4 +13,6 @@ public class CommonUser extends User {
       super(id, firstName, lastName, document, email, password, balance, UserType.COMMON);
    }
 
+   public CommonUser() {
+   }
 }

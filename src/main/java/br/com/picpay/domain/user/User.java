@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
@@ -27,5 +25,18 @@ public abstract class User {
    @Enumerated(EnumType.STRING)
    private UserType userType;
 
+   // protected para garantir que seja instanciada apenas atraves de subclass concretas
+   protected User(Long id, String firstName, String lastName, String document, String email, String password, BigDecimal balance, UserType userType) {
+      this.id = id;
+      this.firstName = firstName;
+      this.lastName = lastName;
+      this.document = document;
+      this.email = email;
+      this.password = password;
+      this.balance = balance;
+      this.userType = userType;
+   }
 
+   protected User() {
+   }
 }
