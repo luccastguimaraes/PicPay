@@ -1,6 +1,5 @@
 package br.com.picpay.repository;
 
-
 import br.com.picpay.domain.user.CommonUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 
