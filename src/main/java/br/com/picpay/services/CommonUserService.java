@@ -14,10 +14,12 @@ import java.math.BigDecimal;
 @Service
 public class CommonUserService extends UserService<CommonUser> {
 
+
    @Autowired
    public CommonUserService(UserRepository<CommonUser> repository) {
       super(repository);
    }
+
    /*
     parece redudante mas no meu pensamento
     é para evitar que seja realizado transaction sem necessidade
@@ -36,18 +38,6 @@ public class CommonUserService extends UserService<CommonUser> {
       );
    }
 
-   @Override
-   public void save(CommonUser payer) {
-      try {
-        this.repository.save(payer);
-      } catch (ConstraintViolationException e) {
-         throw new IllegalArgumentException("Erro de validação ao salvar usuário: " + e.getMessage(), e);
-      } catch (DataAccessException e) {
-         throw new RuntimeException("Erro ao acessar dados ao salvar usuário: " + e.getMessage(), e);
-      } catch (TransactionException e) {
-         throw new RuntimeException("Erro na transação ao salvar usuário: " + e.getMessage(), e);
-      }
-   }
 
    @Override
    public CommonUser createUser(UserDTO userDTO) {

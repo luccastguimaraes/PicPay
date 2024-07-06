@@ -7,6 +7,7 @@ import br.com.picpay.domain.user.User;
 import br.com.picpay.dto.AuthorizationResponse;
 import br.com.picpay.dto.TransactionDTO;
 import br.com.picpay.repository.TransactionRepository;
+import br.com.picpay.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,35 +20,39 @@ import java.time.LocalDateTime;
 @Service
 public class TransactionService {
 
+   @Autowired
    private CommonUserService commonUserService;
-   private UserService<User> userService;
-   private TransactionRepository repository;
+
+   @Autowired
+   private UserServiceFactory userServiceFactory;
+
+   @Autowired
+   private UserRepository<User> userRepository;
+
+   @Autowired
+   private TransactionRepository transactionRepository;
+
+   @Autowired
    private RestTemplate restTemplate;
+
    @Value("${mock.autorizador}")
    private String mockAutorizadorUrl;
 
-   @Autowired
-   public TransactionService(CommonUserService commonUserService, UserService<User> userService, TransactionRepository repository, RestTemplate restTemplate) {
-      this.commonUserService = commonUserService;
-      this.userService = userService;
-      this.repository = repository;
-      this.restTemplate = restTemplate;
-   }
-
    /*
-      Para que todas as operações dentro deste método devem ser tratadas como uma transação única.
-      Se ocorrer uma exceção (Exception ou subclasse dela),
-      a transação será revertida (rollback) automaticamente, garantindo a integridade dos dados.
-    */
+         Para que todas as operações dentro deste método devem ser tratadas como uma transação única.
+         Se ocorrer uma exceção (Exception ou subclasse dela),
+         a transação será revertida (rollback) automaticamente, garantindo a integridade dos dados.
+       */
    @Transactional(rollbackFor = Exception.class)
    public void startTransaction(TransactionDTO transactionDTO) throws Exception {
       CommonUser payer = validatePayer(transactionDTO.payerId());
       BigDecimal amountTransferred = transactionDTO.amountTransferred();
       validatePayerBalancer(payer, amountTransferred);
-      var payee = this.userService.findUserById(transactionDTO.payeeId());
+      var payee = this.userRepository.findById(transactionDTO.payeeId())
+            .orElseThrow(
+                  () -> new RuntimeException("PayeeId not found")
+            );
       externalAuthorizer(payer, payee, amountTransferred);
-
-
    }
 
    private void validatePayerBalancer(CommonUser payer, BigDecimal amountTransferred) throws Exception {
@@ -55,10 +60,9 @@ public class TransactionService {
    }
 
    private CommonUser validatePayer(Long id) {
-      User payerUser = this.userService.findUserById(id);
-      if (payerUser instanceof CommonUser) {
-         return (CommonUser) payerUser;
-      } else {
+      try {
+         return this.commonUserService.findUserById(id);
+      } catch (Exception e) {
          throw new IllegalArgumentException("Tipo de usuário não suportado para transações.");
       }
    }
@@ -92,14 +96,9 @@ public class TransactionService {
          transaction.setTransactionTime(LocalDateTime.now());
          payer.transfer(amountTransferred);
          payee.receive(amountTransferred);
-         repository.save(transaction);
+         transactionRepository.save(transaction);
          commonUserService.save(payer);
-         if (payee instanceof CommonUser commonUserPayee){
-            userService.save(commonUserPayee);
-         } else if (payee instanceof MerchantUser merchantUserPayee) {
-            userService.save(merchantUserPayee);
-         }
-
+         userRepository.save(payee);
       } catch (Exception e) {
          System.out.println("Erro ao criar transação: " + e.getMessage());
       }

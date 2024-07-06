@@ -1,5 +1,9 @@
 package br.com.picpay.infra;
 
+import br.com.picpay.domain.user.CommonUser;
+import br.com.picpay.domain.user.MerchantUser;
+import br.com.picpay.repository.UserRepository;
+import br.com.picpay.services.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -7,7 +11,17 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class AppConfig {
    @Bean
-   public RestTemplate restTemplate(){
+   public RestTemplate restTemplate() {
       return new RestTemplate();
+   }
+
+   @Bean
+   public CommonUserService commonUserService(UserRepository<CommonUser> repository) {
+      return new CommonUserService(repository);
+   }
+
+   @Bean
+   public MerchantUserService merchantUserService(UserRepository<MerchantUser> repository) {
+      return new MerchantUserService(repository);
    }
 }
