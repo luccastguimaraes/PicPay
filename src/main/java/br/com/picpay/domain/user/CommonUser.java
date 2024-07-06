@@ -15,4 +15,8 @@ public class CommonUser extends User {
 
    public CommonUser() {
    }
+
+   public void transfer(BigDecimal amountTransferred){
+      this.balance = this.balance.subtract(amountTransferred);
+   }
 }

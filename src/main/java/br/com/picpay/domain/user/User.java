@@ -9,21 +9,20 @@ import java.math.BigDecimal;
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
-@Setter
 @EqualsAndHashCode(of = "id")
 public abstract class User {
    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
    private Long id;
-   private String firstName;
-   private String lastName;
+   protected String firstName;
+   protected String lastName;
    @Column(unique = true)
-   private String document;
+   protected String document;
    @Column(unique = true)
-   private String email;
-   private String password;
-   private BigDecimal balance;
+   protected String email;
+   protected String password;
+   protected BigDecimal balance;
    @Enumerated(EnumType.STRING)
-   private UserType userType;
+   protected UserType userType;
 
    // protected para garantir que seja instanciada apenas atraves de subclass concretas
    protected User(Long id, String firstName, String lastName, String document, String email, String password, BigDecimal balance, UserType userType) {
@@ -39,4 +38,10 @@ public abstract class User {
 
    protected User() {
    }
+
+
+   public void receive(BigDecimal amountTransferred) {
+      this.balance = this.balance.add(amountTransferred);
+   }
+
 }
