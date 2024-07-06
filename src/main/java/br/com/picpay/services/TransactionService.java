@@ -72,7 +72,7 @@ public class TransactionService {
       boolean criterion2 = false;
       if (authorizationResponse!=null) {
          criterion1 = "success".equalsIgnoreCase(authorizationResponse.status());
-         criterion2 = "authorization".equalsIgnoreCase(String.valueOf(authorizationResponse.data().authorization()));
+         criterion2 = "true".equalsIgnoreCase(String.valueOf(authorizationResponse.data().authorization()));
          if (criterion1 && criterion2) {
             this.createTransaction(payer, payee, amountTransferred);
          } else {
