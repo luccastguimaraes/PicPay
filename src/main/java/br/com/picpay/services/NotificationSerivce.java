@@ -1,6 +1,7 @@
 package br.com.picpay.services;
 
 import br.com.picpay.domain.user.User;
+import br.com.picpay.dto.NotificationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -20,10 +21,11 @@ public class NotificationSerivce {
       this.mockSendNotification = mockSendNotification;
    }
 
-   public void sendNotification(User payee, String msg) throws Exception {
+   public void sendNotification(User payee, String status, String msg) throws Exception {
       try{
          String email = payee.getEmail();
-         NotificationRequest noficationResquest = new NotificationRequest(email, msg);
+         NotificationRequest.NotificationData data = new NotificationRequest.NotificationData(msg);
+         NotificationRequest noficationResquest = new NotificationRequest(email, status, data);
          ResponseEntity<String> notificationResponse = restTemplate.postForEntity(mockSendNotification, noficationResquest, String.class);
          if(!(notificationResponse.getStatusCode() == HttpStatus.OK)){
             throw new Exception("NotificationService está indisponível/instável");
