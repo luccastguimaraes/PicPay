@@ -2,6 +2,7 @@ package br.com.picpay.services;
 
 import br.com.picpay.domain.user.MerchantUser;
 import br.com.picpay.domain.user.User;
+import br.com.picpay.dto.UserDTO;
 import br.com.picpay.repository.UserRepository;
 import org.hibernate.TransactionException;
 import org.hibernate.exception.ConstraintViolationException;
@@ -27,7 +28,7 @@ public class MerchantUserService extends UserService<MerchantUser> {
    @Override
    public void save(MerchantUser user) {
       try {
-         MerchantUser merchantUser = this.repository.save(user);
+         this.repository.save(user);
       } catch (ConstraintViolationException e) {
          throw new IllegalArgumentException("Erro de validação ao salvar usuário: " + e.getMessage(), e);
       } catch (DataAccessException e) {
@@ -35,5 +36,17 @@ public class MerchantUserService extends UserService<MerchantUser> {
       } catch (TransactionException e) {
          throw new RuntimeException("Erro na transação ao salvar usuário: " + e.getMessage(), e);
       }
+   }
+
+   @Override
+   public MerchantUser createUser(UserDTO userDTO) {
+      return new MerchantUser(
+            userDTO.firstName(),
+            userDTO.lastName(),
+            userDTO.document(),
+            userDTO.email(),
+            userDTO.password(),
+            userDTO.balance()
+      );
    }
 }

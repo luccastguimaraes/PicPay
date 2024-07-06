@@ -1,6 +1,7 @@
 package br.com.picpay.services;
 
 import br.com.picpay.domain.user.CommonUser;
+import br.com.picpay.dto.UserDTO;
 import br.com.picpay.repository.UserRepository;
 import org.hibernate.TransactionException;
 import org.hibernate.exception.ConstraintViolationException;
@@ -38,7 +39,7 @@ public class CommonUserService extends UserService<CommonUser> {
    @Override
    public void save(CommonUser payer) {
       try {
-         CommonUser commonUser = repository.save(payer);
+        this.repository.save(payer);
       } catch (ConstraintViolationException e) {
          throw new IllegalArgumentException("Erro de validação ao salvar usuário: " + e.getMessage(), e);
       } catch (DataAccessException e) {
@@ -46,5 +47,17 @@ public class CommonUserService extends UserService<CommonUser> {
       } catch (TransactionException e) {
          throw new RuntimeException("Erro na transação ao salvar usuário: " + e.getMessage(), e);
       }
+   }
+
+   @Override
+   public CommonUser createUser(UserDTO userDTO) {
+      return new CommonUser(
+            userDTO.firstName(),
+            userDTO.lastName(),
+            userDTO.document(),
+            userDTO.email(),
+            userDTO.password(),
+            userDTO.balance()
+      );
    }
 }

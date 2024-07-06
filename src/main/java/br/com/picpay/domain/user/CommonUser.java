@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 @Table(name = "common_users")
 public class CommonUser extends User {
 
-   public CommonUser(Long id, String firstName, String lastName, String document, String email, String password, BigDecimal balance) {
-      super(id, firstName, lastName, document, email, password, balance, UserType.COMMON);
+   public CommonUser(String firstName, String lastName, String document, String email, String password, BigDecimal balance) {
+      super(firstName, lastName, document, email, password, balance, UserType.COMMON);
    }
 
    public CommonUser() {

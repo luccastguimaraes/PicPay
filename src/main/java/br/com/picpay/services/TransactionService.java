@@ -2,6 +2,7 @@ package br.com.picpay.services;
 
 import br.com.picpay.domain.transaction.Transaction;
 import br.com.picpay.domain.user.CommonUser;
+import br.com.picpay.domain.user.MerchantUser;
 import br.com.picpay.domain.user.User;
 import br.com.picpay.dto.AuthorizationResponse;
 import br.com.picpay.dto.TransactionDTO;
@@ -9,48 +10,52 @@ import br.com.picpay.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
-public class TransactionService<T extends User> {
+public class TransactionService {
 
-   private UserService<T> userService;
+   private CommonUserService commonUserService;
+   private UserService<User> userService;
    private TransactionRepository repository;
    private RestTemplate restTemplate;
    @Value("${mock.autorizador}")
    private String mockAutorizadorUrl;
 
    @Autowired
-   public TransactionService(UserService<T> userService, TransactionRepository repository, RestTemplate restTemplate) {
+   public TransactionService(CommonUserService commonUserService, UserService<User> userService, TransactionRepository repository, RestTemplate restTemplate) {
+      this.commonUserService = commonUserService;
       this.userService = userService;
       this.repository = repository;
       this.restTemplate = restTemplate;
    }
 
+   /*
+      Para que todas as operações dentro deste método devem ser tratadas como uma transação única.
+      Se ocorrer uma exceção (Exception ou subclasse dela),
+      a transação será revertida (rollback) automaticamente, garantindo a integridade dos dados.
+    */
+   @Transactional(rollbackFor = Exception.class)
    public void startTransaction(TransactionDTO transactionDTO) throws Exception {
-      User payerUser = this.userService.findUserById(transactionDTO.payerId());
-      CommonUser payer = validatePayer(payerUser);
+      CommonUser payer = validatePayer(transactionDTO.payerId());
       BigDecimal amountTransferred = transactionDTO.amountTransferred();
       validatePayerBalancer(payer, amountTransferred);
-      User payee = this.userService.findUserById(transactionDTO.payeeId());
+      var payee = this.userService.findUserById(transactionDTO.payeeId());
       externalAuthorizer(payer, payee, amountTransferred);
 
 
    }
 
    private void validatePayerBalancer(CommonUser payer, BigDecimal amountTransferred) throws Exception {
-      if (this.userService instanceof CommonUserService commonUserService) {
-         commonUserService.validateBalance(payer, amountTransferred);
-      } else {
-         throw new IllegalStateException("userService não é uma instância de CommonUserService");
-      }
-
+      this.commonUserService.validateBalance(payer, amountTransferred);
    }
 
-   private CommonUser validatePayer(User payerUser) {
+   private CommonUser validatePayer(Long id) {
+      User payerUser = this.userService.findUserById(id);
       if (payerUser instanceof CommonUser) {
          return (CommonUser) payerUser;
       } else {
@@ -88,8 +93,12 @@ public class TransactionService<T extends User> {
          payer.transfer(amountTransferred);
          payee.receive(amountTransferred);
          repository.save(transaction);
-         userService.save((T) payer);
-         userService.save((T) payee);
+         commonUserService.save(payer);
+         if (payee instanceof CommonUser commonUserPayee){
+            userService.save(commonUserPayee);
+         } else if (payee instanceof MerchantUser merchantUserPayee) {
+            userService.save(merchantUserPayee);
+         }
 
       } catch (Exception e) {
          System.out.println("Erro ao criar transação: " + e.getMessage());

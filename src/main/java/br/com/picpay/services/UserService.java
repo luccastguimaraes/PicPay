@@ -1,11 +1,12 @@
 package br.com.picpay.services;
 
 import br.com.picpay.domain.user.User;
+import br.com.picpay.dto.UserDTO;
 import br.com.picpay.repository.UserRepository;
-import org.hibernate.TransactionException;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /*
    A ideia aqui é criar uma estrutura que permita funcionalidades comuns e
@@ -22,8 +23,17 @@ public abstract class UserService<T extends User> {
    }
 
 
-   public abstract T findUserById(Long id);
+   public T findUserById(Long id){
+      return repository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+   }
 
-
+   @Transactional
    public abstract void save(T user);
+
+   @Transactional
+   public abstract T createUser(UserDTO userDTO);
+
+   public List<T> getAllUsers() {
+      return this.repository.findAll();
+   }
 }

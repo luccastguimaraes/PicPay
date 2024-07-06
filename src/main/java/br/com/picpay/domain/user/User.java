@@ -25,8 +25,7 @@ public abstract class User {
    protected UserType userType;
 
    // protected para garantir que seja instanciada apenas atraves de subclass concretas
-   protected User(Long id, String firstName, String lastName, String document, String email, String password, BigDecimal balance, UserType userType) {
-      this.id = id;
+   protected User(String firstName, String lastName, String document, String email, String password, BigDecimal balance, UserType userType) {
       this.firstName = firstName;
       this.lastName = lastName;
       this.document = document;
