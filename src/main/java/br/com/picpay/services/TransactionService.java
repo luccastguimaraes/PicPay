@@ -16,15 +16,13 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class TransactionService {
 
    @Autowired
    private CommonUserService commonUserService;
-
-   @Autowired
-   private UserServiceFactory userServiceFactory;
 
    @Autowired
    private UserRepository<User> userRepository;
