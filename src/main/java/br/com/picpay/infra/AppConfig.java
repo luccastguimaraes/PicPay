@@ -16,12 +16,12 @@ public class AppConfig {
    }
 
    @Bean
-   public CommonUserService commonUserService(UserRepository<CommonUser> repository) {
+   public CommonUserService commonUserService(UserRepository repository) {
       return new CommonUserService(repository);
    }
 
    @Bean
-   public MerchantUserService merchantUserService(UserRepository<MerchantUser> repository) {
+   public MerchantUserService merchantUserService(UserRepository repository) {
       return new MerchantUserService(repository);
    }
 }

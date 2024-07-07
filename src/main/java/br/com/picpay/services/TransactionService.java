@@ -2,7 +2,6 @@ package br.com.picpay.services;
 
 import br.com.picpay.domain.transaction.Transaction;
 import br.com.picpay.domain.user.CommonUser;
-import br.com.picpay.domain.user.MerchantUser;
 import br.com.picpay.domain.user.User;
 import br.com.picpay.dto.AuthorizationResponse;
 import br.com.picpay.dto.TransactionDTO;
@@ -13,10 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
+
 
 @Service
 public class TransactionService {
@@ -25,7 +23,7 @@ public class TransactionService {
    private CommonUserService commonUserService;
 
    @Autowired
-   private UserRepository<User> userRepository;
+   private UserRepository userRepository;
 
    @Autowired
    private TransactionRepository transactionRepository;
