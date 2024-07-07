@@ -4,6 +4,7 @@ import br.com.picpay.domain.user.CommonUser;
 import br.com.picpay.domain.user.User;
 import br.com.picpay.dto.UserDTO;
 import br.com.picpay.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.TransactionException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class CommonUserService extends UserService<CommonUser> {
       return repository.findById(id)
             .filter(user -> user instanceof CommonUser)
             .map(user -> (CommonUser) user)
-            .orElseThrow(() -> new RuntimeException("CommonUser not found with ID: " + id));
+            .orElseThrow(() -> new EntityNotFoundException("CommonUser not found with ID: " + id));
    }
 
    /*

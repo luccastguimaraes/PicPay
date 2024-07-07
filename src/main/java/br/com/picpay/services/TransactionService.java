@@ -124,15 +124,14 @@ public class TransactionService {
          msgPayee = "You have received a transfer of $" + amountTransferred;
          return transaction;
       } catch (Exception e) {
-         throw new Exception("Transaction Error");
+         throw new Exception("Create Transaction Error", e);
       } finally {
-         /*
-         sendNotification(payer.getEmail(), status, msgPayer);
-         sendNotification(payee.getEmail(), status, msgPayee);
-          */
-         System.out.println(status);
-         System.out.println(msgPayer);
-         System.out.println(msgPayee);
+         try{
+            sendNotification(payer.getEmail(), status, msgPayer);
+            sendNotification(payee.getEmail(), status, msgPayee);
+         } catch (Exception e){
+            System.err.println("Failed to send notification: " + e.getMessage());
+         }
       }
    }
 
