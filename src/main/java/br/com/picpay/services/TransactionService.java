@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -29,18 +30,27 @@ public class TransactionService {
    private TransactionRepository transactionRepository;
 
    @Autowired
+   private NotificationSerivce notificationSerivce;
+
+   @Autowired
    private RestTemplate restTemplate;
 
    @Value("${mock.autorizador}")
    private String mockAutorizadorUrl;
+
+   public static final String STATUS_SUCCESS = "success";
+
+   public static final String STATUS_FAIL = "fail";
+
 
    /*
          Para que todas as operações dentro deste método devem ser tratadas como uma transação única.
          Se ocorrer uma exceção (Exception ou subclasse dela),
          a transação será revertida (rollback) automaticamente, garantindo a integridade dos dados.
        */
+
    @Transactional(rollbackFor = Exception.class)
-   public void startTransaction(TransactionDTO transactionDTO) throws Exception {
+   public Transaction startTransaction(TransactionDTO transactionDTO) throws Exception {
       CommonUser payer = validatePayer(transactionDTO.payerId());
       BigDecimal amountTransferred = transactionDTO.amountTransferred();
       validatePayerBalancer(payer, amountTransferred);
@@ -48,7 +58,17 @@ public class TransactionService {
             .orElseThrow(
                   () -> new RuntimeException("PayeeId not found")
             );
-      externalAuthorizer(payer, payee, amountTransferred);
+      return externalAuthorizer(payer, payee, amountTransferred);
+   }
+
+   private void sendNotification(String email, String status, String message) throws Exception {
+      if (STATUS_SUCCESS.equalsIgnoreCase(status)) {
+         this.notificationSerivce.sendNotification(
+               email,
+               status,
+               message
+         );
+      }
    }
 
    private void validatePayerBalancer(CommonUser payer, BigDecimal amountTransferred) throws Exception {
@@ -63,18 +83,18 @@ public class TransactionService {
       }
    }
 
-   private void externalAuthorizer(CommonUser payer, User payee, BigDecimal amountTransferred) throws Exception {
+   private Transaction externalAuthorizer(CommonUser payer, User payee, BigDecimal amountTransferred) throws Exception {
       AuthorizationResponse authorizationResponse = restTemplate.getForObject(
-            this.mockAutorizadorUrl,
+            mockAutorizadorUrl,
             AuthorizationResponse.class
       );
       boolean criterion1 = false;
       boolean criterion2 = false;
       if (authorizationResponse!=null) {
-         criterion1 = "success".equalsIgnoreCase(authorizationResponse.status());
+         criterion1 = STATUS_SUCCESS.equalsIgnoreCase(authorizationResponse.status());
          criterion2 = "true".equalsIgnoreCase(String.valueOf(authorizationResponse.data().authorization()));
          if (criterion1 && criterion2) {
-            this.createTransaction(payer, payee, amountTransferred);
+            return this.createTransaction(payer, payee, amountTransferred);
          } else {
             throw new Exception("Authorization is false");
          }
@@ -83,7 +103,11 @@ public class TransactionService {
       }
    }
 
-   private void createTransaction(CommonUser payer, User payee, BigDecimal amountTransferred) {
+
+   private Transaction createTransaction(CommonUser payer, User payee, BigDecimal amountTransferred) throws Exception {
+      String status = STATUS_FAIL;
+      String msgPayer = "Transaction Error";
+      String msgPayee = "Transaction Error";
       try {
          Transaction transaction = new Transaction();
          transaction.setPayer(payer);
@@ -95,10 +119,21 @@ public class TransactionService {
          transactionRepository.save(transaction);
          commonUserService.save(payer);
          userRepository.save(payee);
+         status = STATUS_SUCCESS;
+         msgPayer = "You have made a transfer of $" + amountTransferred;
+         msgPayee = "You have received a transfer of $" + amountTransferred;
+         return transaction;
       } catch (Exception e) {
-         System.out.println("Erro ao criar transação: " + e.getMessage());
+         throw new Exception("Transaction Error");
+      } finally {
+         /*
+         sendNotification(payer.getEmail(), status, msgPayer);
+         sendNotification(payee.getEmail(), status, msgPayee);
+          */
+         System.out.println(status);
+         System.out.println(msgPayer);
+         System.out.println(msgPayee);
       }
-
    }
 
 

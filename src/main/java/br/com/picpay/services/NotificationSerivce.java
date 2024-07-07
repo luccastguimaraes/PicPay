@@ -4,9 +4,9 @@ import br.com.picpay.domain.user.User;
 import br.com.picpay.dto.NotificationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -21,18 +21,17 @@ public class NotificationSerivce {
       this.mockSendNotification = mockSendNotification;
    }
 
-   public void sendNotification(User payee, String status, String msg) throws Exception {
+   public void sendNotification(String email, String status, String message) throws Exception {
       try{
-         String email = payee.getEmail();
-         NotificationRequest.NotificationData data = new NotificationRequest.NotificationData(msg);
-         NotificationRequest noficationResquest = new NotificationRequest(email, status, data);
-         ResponseEntity<String> notificationResponse = restTemplate.postForEntity(mockSendNotification, noficationResquest, String.class);
-         if(!(notificationResponse.getStatusCode() == HttpStatus.OK)){
-            throw new Exception("NotificationService está indisponível/instável");
-         }
-
-      } catch (Exception e) {
-         throw new Exception("Erro sendNotification");
+         NotificationRequest.NotificationData data = new NotificationRequest.NotificationData(message);
+         NotificationRequest request = new NotificationRequest(email, status, data);
+         HttpHeaders headers = new HttpHeaders();
+         headers.setContentType(MediaType.APPLICATION_JSON);
+         HttpEntity<NotificationRequest> requestHttpEntity = new HttpEntity<>(request, headers);
+         restTemplate.postForEntity(mockSendNotification, requestHttpEntity, Void.class);
+         System.out.println(requestHttpEntity.getBody().toString());
+      } catch (RestClientException e) {
+         throw new Exception("Failed to send notification: " + e.getMessage(), e);
       }
    }
 }
