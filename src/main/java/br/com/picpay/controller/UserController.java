@@ -21,7 +21,7 @@ public class UserController {
    @Autowired
    private MerchantUserService merchantUserService;
    @Autowired
-   private UserRepository<User> repository;
+   private UserRepository repository;
 
    @PostMapping("/common")
    public ResponseEntity<User> createCommonUser(@RequestBody @Valid UserDTO userDTO){

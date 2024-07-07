@@ -17,15 +17,13 @@ import java.util.List;
 public abstract class UserService<T extends User> {
 
 
-   protected UserRepository<T> repository;
+   protected UserRepository repository;
 
-   public UserService(UserRepository<T>  repository) {
+   public UserService(UserRepository repository) {
       this.repository = repository;
    }
 
-   public T findUserById(Long id){
-      return repository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-   }
+   public abstract User findUserById(Long id);
 
    public void save(T user){
       try {
@@ -39,9 +37,9 @@ public abstract class UserService<T extends User> {
       }
    }
 
-   public abstract T createUser(UserDTO userDTO);
+   public abstract User createUser(UserDTO userDTO);
 
-   public List<T> getAllUsers() {
+   public List<User> getAllUsers() {
       return this.repository.findAll();
    }
 }

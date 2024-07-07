@@ -1,6 +1,7 @@
 package br.com.picpay.services;
 
 import br.com.picpay.domain.user.CommonUser;
+import br.com.picpay.domain.user.User;
 import br.com.picpay.dto.UserDTO;
 import br.com.picpay.repository.UserRepository;
 import org.hibernate.TransactionException;
@@ -16,8 +17,16 @@ public class CommonUserService extends UserService<CommonUser> {
 
 
    @Autowired
-   public CommonUserService(UserRepository<CommonUser> repository) {
+   public CommonUserService(UserRepository repository) {
       super(repository);
+   }
+
+   @Override
+   public CommonUser findUserById(Long id) {
+      return repository.findById(id)
+            .filter(user -> user instanceof CommonUser)
+            .map(user -> (CommonUser) user)
+            .orElseThrow(() -> new RuntimeException("CommonUser not found with ID: " + id));
    }
 
    /*
@@ -31,17 +40,10 @@ public class CommonUserService extends UserService<CommonUser> {
       }
    }
 
-   @Override
-   public CommonUser findUserById(Long id) {
-      return repository.findById(id).orElseThrow(
-            () -> new IllegalArgumentException("Usuário não encontrado com ID: " + id)
-      );
-   }
-
 
    @Override
    public CommonUser createUser(UserDTO userDTO) {
-      return new CommonUser(
+      CommonUser newUser = new CommonUser(
             userDTO.firstName(),
             userDTO.lastName(),
             userDTO.document(),
@@ -49,5 +51,7 @@ public class CommonUserService extends UserService<CommonUser> {
             userDTO.password(),
             userDTO.balance()
       );
+      save(newUser);
+      return newUser;
    }
 }
