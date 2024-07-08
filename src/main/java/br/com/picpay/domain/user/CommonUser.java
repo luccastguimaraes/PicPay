@@ -14,6 +14,7 @@ public class CommonUser extends User {
    }
 
    public CommonUser() {
+      super(UserType.COMMON);
    }
 
    public void transfer(BigDecimal amountTransferred){

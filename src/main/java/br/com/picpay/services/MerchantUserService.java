@@ -26,7 +26,7 @@ public class MerchantUserService extends UserService<MerchantUser> {
 
 
    @Override
-   public MerchantUser createUser(UserDTO userDTO) {
+   public MerchantUser createUser(UserDTO userDTO) throws Exception {
       MerchantUser newUser = new MerchantUser(
             userDTO.firstName(),
             userDTO.lastName(),

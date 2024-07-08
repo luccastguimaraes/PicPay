@@ -24,13 +24,13 @@ public class UserController {
    private UserRepository repository;
 
    @PostMapping("/common")
-   public ResponseEntity<User> createCommonUser(@RequestBody @Valid UserDTO userDTO){
+   public ResponseEntity<User> createCommonUser(@RequestBody @Valid UserDTO userDTO) throws Exception {
       User newUser = commonUserService.createUser(userDTO);
       return ResponseEntity.ok(newUser);
    }
 
    @PostMapping("/merchant")
-   public ResponseEntity<User> createMerchantUser(@RequestBody @Valid UserDTO userDTO){
+   public ResponseEntity<User> createMerchantUser(@RequestBody @Valid UserDTO userDTO) throws Exception {
       User newUser = merchantUserService.createUser(userDTO);
       return ResponseEntity.ok(newUser);
    }

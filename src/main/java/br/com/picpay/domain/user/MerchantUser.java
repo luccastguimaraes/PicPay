@@ -15,5 +15,6 @@ public class MerchantUser extends User{
    }
 
    public MerchantUser() {
+      super(UserType.MERCHANT);
    }
 }

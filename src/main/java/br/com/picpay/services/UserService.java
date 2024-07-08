@@ -25,19 +25,21 @@ public abstract class UserService<T extends User> {
 
    public abstract User findUserById(Long id);
 
-   public void save(T user){
+   public void save(T user) throws Exception {
       try {
          this.repository.save(user);
       } catch (ConstraintViolationException e) {
-         throw new IllegalArgumentException("Erro de validação ao salvar usuário: " + e.getMessage(), e);
+         throw new IllegalArgumentException("Erro de validação ao salvar usuário: " + e.getMessage());
       } catch (DataAccessException e) {
-         throw new RuntimeException("Erro ao acessar dados ao salvar usuário: " + e.getMessage(), e);
+         throw new RuntimeException("Erro ao acessar dados ao salvar usuário: " + e.getMessage());
       } catch (TransactionException e) {
-         throw new RuntimeException("Erro na transação ao salvar usuário: " + e.getMessage(), e);
+         throw new RuntimeException("Erro na transação ao salvar usuário: " + e.getMessage());
+      } catch (Exception e) {
+         throw new Exception("Erro na transação ao salvar usuário: ");
       }
    }
 
-   public abstract User createUser(UserDTO userDTO);
+   public abstract User createUser(UserDTO userDTO) throws Exception;
 
    public List<User> getAllUsers() {
       return this.repository.findAll();

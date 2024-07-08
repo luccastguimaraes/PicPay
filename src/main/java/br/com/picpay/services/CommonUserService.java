@@ -43,7 +43,7 @@ public class CommonUserService extends UserService<CommonUser> {
 
 
    @Override
-   public CommonUser createUser(UserDTO userDTO) {
+   public CommonUser createUser(UserDTO userDTO) throws Exception {
       CommonUser newUser = new CommonUser(
             userDTO.firstName(),
             userDTO.lastName(),

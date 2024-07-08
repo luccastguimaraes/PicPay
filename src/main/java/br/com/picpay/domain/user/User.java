@@ -38,6 +38,10 @@ public abstract class User {
    protected User() {
    }
 
+   protected User(UserType userType) {
+      this.userType = userType;
+   }
+
 
    public void receive(BigDecimal amountTransferred) {
       this.balance = this.balance.add(amountTransferred);
